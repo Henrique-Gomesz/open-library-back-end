@@ -1,11 +1,11 @@
-import { MongoClient, Db } from 'mongodb';
+import mongoose, { ConnectOptions } from 'mongoose';
 
 class Database {
   private static instance: Database;
-  private client: MongoClient;
+  private uri: string;
 
   private constructor() {
-    this.client = new MongoClient('mongodb+srv://admin:admin@openlibrary.wiyeyo3.mongodb.net/openlibrary?retryWrites=true&w=majority&appName=openlibrary');
+    this.uri = 'mongodb+srv://admin:admin@openlibrary.wiyeyo3.mongodb.net/openlibrary?retryWrites=true&w=majority';
   }
 
   public static getInstance(): Database {
@@ -18,16 +18,17 @@ class Database {
 
   public async connect(): Promise<void> {
     try {
-      await this.client.connect();
+    
+      await mongoose.connect(this.uri);
       console.log('Connected to MongoDB');
     } catch (err) {
       console.error('Error connecting to MongoDB:', err);
     }
   }
 
-  public get db(): Db {
-    return this.client.db('your_database_name'); // Replace 'your_database_name' with your actual database name
+  public get connection(): mongoose.Connection {
+    return mongoose.connection;
   }
 }
 
-export const MongoDatabase =  Database.getInstance()
+export const MongoDatabase = Database.getInstance();
