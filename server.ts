@@ -28,15 +28,13 @@ MongoDatabase.connect().then(
                 }
               });
 
-            app.get('/', async (req: Request, res: Response) => {
+            app.post('/users', async (req: Request, res: Response) => {
                 
                 await userRepository.create({
-                    usu_phone: '123456789',
+                    usu_contato:{},
                     usu_nome: 'Nome do Usuário',
-                    usu_email: 'usuario@example.com',
                     usu_cpf: '123.456.789-00',
                     usu_nascimento: new Date('1990-01-01'),
-                    usu_conta_ativa: true
                 });
                 
                 res.send('Welcome to Express & TypeScript Server');

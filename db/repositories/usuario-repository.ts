@@ -11,7 +11,6 @@ export class UsuarioRepository {
   }
 
   public async create(usuario: Usuario): Promise<Usuario> {
-    console.log('criando')
     const newUsuario = new UsuarioModel(usuario);
     await newUsuario.save();
     return newUsuario;
