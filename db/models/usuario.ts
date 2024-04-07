@@ -2,8 +2,8 @@ import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
 
 export type ContatoUsuario = {
-  usu_phone?: string;
-  usu_email?: string;
+  telefone?: string;
+  email?: string;
 }
 
 export interface Usuario {

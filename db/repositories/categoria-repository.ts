@@ -11,6 +11,8 @@ export class CategoriaRepository {
   }
 
   public async create(categoria: Categoria): Promise<Categoria> {
+    const categoriaId = await CategoriaModel.find().countDocuments().exec() + 1;
+    categoria.id = categoriaId
     const newCategoria = new CategoriaModel(categoria);
     await newCategoria.save();
     return newCategoria;

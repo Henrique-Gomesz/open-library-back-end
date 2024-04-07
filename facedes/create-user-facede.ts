@@ -1,16 +1,20 @@
 import { CategoriaUsuarioRepository } from "../db/repositories/categoria-usuario-repository";
 import { UsuarioRepository } from "../db/repositories/usuario-repository";
 import { CreateUserRequest } from "../requests/create-user-request";
+import _ from 'lodash';
 
 export class CreateUserFacede {
   private usuarioRepository: UsuarioRepository;
   private categoriaUsuarioRepository: CategoriaUsuarioRepository;
 
+  public onSuccess = () => {}
+  public onError = () => {}
+
   constructor() {
     this.usuarioRepository = new UsuarioRepository();
     this.categoriaUsuarioRepository = new CategoriaUsuarioRepository();
   }
-
+ 
   public async execute(createUser: CreateUserRequest): Promise<void> {
     try {
       const user = await this.usuarioRepository.create({
@@ -26,8 +30,9 @@ export class CreateUserFacede {
           categoria_id: categoria,
         });
       }
-
+      this.onSuccess()
     } catch (error) {
+        this.onError()
         console.log(CreateUserFacede.name, error)
     }
   }

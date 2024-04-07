@@ -1,22 +1,23 @@
-import mongoose from "mongoose";
-import { EnumCategorias } from "./categorias";
 import { ObjectId } from "mongodb";
+import mongoose from "mongoose";
 
 export interface Livro {
   livro_nome: string;
-  editora_id: number;
   lanca_ano: Date;
-  genero: EnumCategorias;
-  quantidade: number;
+  livro_categoria: number;
+  livro_autores: string[];
+  livro_paginas: number;
+  livro_editora: string;
   _id?: ObjectId
-  }
-  
+}
 
- const LivroSchema = new mongoose.Schema<Livro>({
-    livro_nome: { type: String, required: true },
-    lanca_ano: { type: Date, required: true },
-    genero: { type: Number, enum: EnumCategorias, required: true },
-    quantidade: { type: Number, required: true },
-  });
 
-  export const LivroModel = mongoose.model<Livro>('Livro', LivroSchema);
+const LivroSchema = new mongoose.Schema<Livro>({
+  livro_nome: { type: String, required: true },
+  lanca_ano: { type: Date, required: true },
+  livro_categoria: { type: Number, required: true },
+  livro_paginas: { type: Number, required: true },
+  livro_editora: { type: String, required: true },
+});
+
+export const LivroModel = mongoose.model<Livro>('Livro', LivroSchema);

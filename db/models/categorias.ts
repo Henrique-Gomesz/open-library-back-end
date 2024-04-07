@@ -1,36 +1,18 @@
 import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
 
-// Enum para as categorias
-export enum EnumCategorias {
-    Romance,
-    FiccaoCientifica,
-    Fantasia,
-    Misterio,
-    Suspense,
-    Terror,
-    Poesia,
-    NaoFiccao,
-    Historia,
-    Biografia,
-    Autobiografia,
-    Filosofia,
-    Autoajuda,
-    Policial,
-    Aventura,
-    LiteraturaClassica,
-    LiteraturaContemporanea,
-    Dramaturgia,
-  }
+
 
   export interface Categoria {
-    categ_nome: EnumCategorias;
-    _id:ObjectId
+    categ_nome: string;
+    id: number;
+    _id?:ObjectId
   }
   
 
  export const CategoriaSchema = new mongoose.Schema<Categoria>({
-    categ_nome: { type: Number, enum: EnumCategorias, required: true },
+    categ_nome: { type: String, required: true,unique:true },
+    id: { type: Number, required: true, unique: true},
   });
 
   

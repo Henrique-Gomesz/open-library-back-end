@@ -2,46 +2,121 @@ import express, { Application, Request, Response } from 'express';
 import { MongoDatabase } from './db/connection';
 import { UsuarioRepository } from './db/repositories/usuario-repository';
 import { Usuario } from './db/models/usuario';
+import { CreateUserFacede } from './facedes/create-user-facede';
+import { CreateUserRequest } from './requests/create-user-request';
+import { CreateLivroRequest } from './requests/create-book-request';
+import { CreateLivroFacede } from './facedes/create-livro-facede';
+import { CategoriaRepository } from './db/repositories/categoria-repository';
+import { Livro } from './db/models/livros';
+import {Usuario as UsuarioEntity} from './entities/usuario'
+import { zipObjectDeep } from 'lodash';
+import { ObjectId } from 'bson';
 const app: Application = express();
 const port = process.env.PORT || 8000;
 
-
-
-
+app.use(express.json());
 
 MongoDatabase.connect().then(
-    () => {
-        const userRepository = new UsuarioRepository()
+  () => {
+    const createUserFacede = new CreateUserFacede()
+    const createLivroFacede = new CreateLivroFacede()
+    const categoriaRepository = new CategoriaRepository()
+    app.listen(port, async () => {
+      console.log(`Server is Fire at http://localhost:${port}`);
 
-        app.listen(port, async () => {
-            console.log(`Server is Fire at http://localhost:${port}`);
+      app.post('/usuarios', async (req: Request, res: Response) => {
+        try {
+          const onSuccess = () => {
+            res.status(201).json({ message: 'User Created' });
+          }
 
-            app.post('/usuarios', async (req: Request, res: Response) => {
-                try {
-                  const usuario = req.body as Usuario;
-                
-                  const user = await userRepository.create(usuario)
-                  res.status(201).json(user);
-                } catch (err) {
-                  console.error('Erro ao inserir usuário:', err);
-                  res.status(500).json({ message: 'Erro ao inserir usuário' });
-                }
-              });
+          const onError = () => {
+            res.status(500).json({ message: 'Internal Server Error' });
+          }
 
-            app.post('/users', async (req: Request, res: Response) => {
-                
-                await userRepository.create({
-                    usu_contato:{},
-                    usu_nome: 'Nome do Usuário',
-                    usu_cpf: '123.456.789-00',
-                    usu_nascimento: new Date('1990-01-01'),
-                });
-                
-                res.send('Welcome to Express & TypeScript Server');
-            });
-        });
+          const { usu_contato, usu_nome, usu_cpf, usu_nascimento, categorias } = req.body as CreateUserRequest;
 
-        
-   
-}).catch((err) => console.log(err, "Ocorreu um erro ao tentar iniciar o banco de dados"))
+          createUserFacede.onError = onError
+          createUserFacede.onSuccess = onSuccess
+
+          return await createUserFacede.execute({
+            usu_contato,
+            usu_nome,
+            usu_cpf,
+            usu_nascimento,
+            categorias
+          });
+
+        } catch (error) {
+          console.log(CreateUserFacede.name, error)
+          res.status(500).json({ message: 'Internal Server Error' });
+        }
+      });
+
+      app.post('/livro', async (req: Request, res: Response) => {
+        try {
+          const onSuccess = (usuarios:Usuario[],livro:Livro) => {
+            for (const usuario of usuarios){
+              createLivroFacede.inserirAssinante(new UsuarioEntity(
+                usuario.usu_nome,
+                usuario.usu_cpf,
+                usuario.usu_nascimento,
+                usuario.usu_contato,
+              ))
+            }
+
+            createLivroFacede.notificar(livro.livro_nome)
+            for (const usuario of usuarios){
+              createLivroFacede.removerAssinante(new UsuarioEntity(
+                usuario.usu_nome,
+                usuario.usu_cpf,
+                usuario.usu_nascimento,
+                usuario.usu_contato,
+              ))
+            }
+            res.status(201).json({ message: 'Livro Criado',usuarios:usuarios });
+          }
+
+          const onError = () => {
+            res.status(500).json({ message: 'Internal Server Error' });
+          }
+
+          const { livro_nome, lanca_ano, livro_categoria, livro_autores, livro_paginas, livro_editora } = req.body as CreateLivroRequest;
+
+          createLivroFacede.onSuccess = onSuccess
+          createLivroFacede.onError = onError
+          createLivroFacede.execute({
+            livro_nome,
+            lanca_ano,
+            livro_categoria,
+            livro_autores,
+            livro_paginas,
+            livro_editora
+          });
+        } catch (error) {
+          console.log(CreateLivroFacede.name, error)
+          res.status(500).json({ message: 'Internal Server Error' });
+        }
+      })
+
+      app.post('/categoria', async (req: Request, res: Response) => {
+        const categorias = req.body as string[]
+
+        for (const categoria of categorias) {
+          await categoriaRepository.create({ categ_nome: categoria,id:0 });
+        }
+
+        res.status(201).json({ message: 'Categorias Criadas'});
+      })
+
+      app.get('/categoria', async (req: Request, res: Response) => {
+
+        const categorias = await categoriaRepository.findAll()
+    
+        res.status(201).json({ categorias: categorias});
+      })
+
+    });
+
+  }).catch((err) => console.log(err, "Ocorreu um erro ao tentar iniciar o banco de dados"))
 
