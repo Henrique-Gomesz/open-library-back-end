@@ -25,7 +25,6 @@ MongoDatabase.connect()
       console.log(`Server is Fire at http://localhost:${port}`);
 
       app.post("/usuarios", async (req: Request, res: Response) => {
-        console.log("body da requisição ->", req.body);
         try {
           const onSuccess = () => {
             res.status(201).json({ message: "User Created" });
@@ -79,13 +78,11 @@ MongoDatabase.connect()
                 )
               );
             }
-            res
-              .status(201)
-              .json({
-                message: "Livro Criado",
-                usuarios: usuarios,
-                livro: livro.livro_nome,
-              });
+            res.status(201).json({
+              message: "Livro Criado",
+              usuarios: usuarios,
+              livro: livro.livro_nome,
+            });
           };
 
           const onError = () => {
