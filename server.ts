@@ -1,19 +1,18 @@
 import express, { Application, Request, Response } from "express";
 import { MongoDatabase } from "./db/connection";
-import { UsuarioRepository } from "./db/repositories/usuario-repository";
-import { Usuario } from "./db/models/usuario";
-import { CreateUserFacede } from "./facedes/create-user-facede";
-import { CreateUserRequest } from "./requests/create-user-request";
-import { CreateLivroRequest } from "./requests/create-book-request";
-import { CreateLivroFacede } from "./facedes/create-livro-facede";
-import { CategoriaRepository } from "./db/repositories/categoria-repository";
 import { Livro } from "./db/models/livros";
+import { Usuario } from "./db/models/usuario";
+import { CategoriaRepository } from "./db/repositories/categoria-repository";
 import { Usuario as UsuarioEntity } from "./entities/usuario";
-import { zipObjectDeep } from "lodash";
-import { ObjectId } from "bson";
+import { CreateLivroFacede } from "./facedes/create-livro-facede";
+import { CreateUserFacede } from "./facedes/create-user-facede";
+import { CreateLivroRequest } from "./requests/create-book-request";
+import { CreateUserRequest } from "./requests/create-user-request";
+const cors = require("cors");
 const app: Application = express();
-const port = process.env.PORT || 8000;
 
+const port = process.env.PORT || 8000;
+app.use(cors());
 app.use(express.json());
 
 MongoDatabase.connect()
